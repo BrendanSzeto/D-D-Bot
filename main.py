@@ -30,7 +30,9 @@ async def help(ctx):
         '**!roll** *<number-of-dice>*d*<number-of-sides>* - Rolls a specified number of dice. \n' \
         '**!stats** - Generates a set of ability scores for a character randomly.\n' \
         '**!query-spell** *<spell-name>* - Gives information about a spell when given its name.\n' \
-        '**!query-magic-item** *<item-name>* - Gives information about a magic item when given its name.\n'
+        '**!query-magic-item** *<item-name>* - Gives information about a magic item when given its name.\n' \
+        '**!query-item** *<item-name>* - Gives information about a piece of equipment when given its name' \
+        ' (includes weapons, armor, and adventuring gear).'
   await ctx.send(msg)
 
 # Says hello
