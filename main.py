@@ -93,13 +93,13 @@ async def query_spell(ctx, *, arg : str):
     msg = '**Error:** The resource you were looking for could not be found.'
   else:
     msg = '__**' + resource.get('name') + '**__\n' \
-    + '**Level: **' + str(resource.get('level')) + '\n' \
-    + '**School: **' + resource.get('school').get('name') + '\n' \
-    + '**Casting Time: **' + resource.get('casting_time') + '\n' \
-    + '**Range: **' + resource.get('range') + '\n' \
-    + '**Components: **' + ' '.join(resource.get('components')) + '\n\n' \
-    + '\n'.join(resource.get('desc')) + '\n\n'
-    if 'higher_level' in resource:
+          + '**Level: **' + str(resource.get('level')) + '\n' \
+          + '**School: **' + resource.get('school').get('name') + '\n' \
+          + '**Casting Time: **' + resource.get('casting_time') + '\n' \
+          + '**Range: **' + resource.get('range') + '\n' \
+          + '**Components: **' + ' '.join(resource.get('components')) + '\n\n' \
+          + '\n'.join(resource.get('desc')) + '\n\n'
+    if ('higher_level' in resource):
       msg += '***At Higher Levels. ***' + resource.get('higher_level')[0]
 
   # If the message is longer than the character limit Discord allows, split the message into two halves
@@ -110,7 +110,64 @@ async def query_spell(ctx, *, arg : str):
   else:
     await ctx.send(msg)
 
-# Searches the D&D API for specificed magic items
+# Searches the D&D API for specified equipment
+@bot.command(name='query-item')
+async def query_item(ctx, *, arg: str):
+  query = 'equipment/'
+  query += helper_functions.modify_query(arg)
+  resource = helper_functions.get_resource(query)
+
+  if resource == False:
+    msg = '**Error:** The resource you were looking for could not be found.'
+  else:
+    msg = '__**' + resource.get('name') + '**__\n' \
+          + '*' + resource.get('equipment_category').get('name') + ', '
+
+    # Customize the return message depending on the type of equipment the resource is
+    # Armor and Shields
+    if 'armor_category' in resource:
+      msg += resource.get('armor_category') + '*\n' \
+              + 'AC ' + str(resource.get('armor_class').get('base'))
+      if (resource.get('armor_class').get('dex_bonus') == True):
+        msg += ' + Dex'
+      if (resource.get('armor_category') == 'Medium'):
+        msg += ' (Max 2)'
+      if (resource.get('str_minimum') > 0):
+        msg += '\nMin Str ' + str(resource.get('str_minimum'))
+      if (resource.get('stealth_disadvantage') == True):
+        msg += '\nDisadvantage on Stealth rolls'
+
+    # Weapons
+    elif 'weapon_category' in resource:
+      msg += resource.get('category_range') + '*\n' \
+              + resource.get('damage').get('damage_dice') + ' ' \
+              + resource.get('damage').get('damage_type').get('name') + '\n' \
+              + 'Special Properties: '
+      if len(resource.get('properties')):
+        for x in resource.get('properties'):
+          msg += x.get('name')
+          if (x != resource.get('properties')[-1]):
+            msg += ', '
+      else:
+        msg += '*None*'
+
+    # Adventuring Gear & Misc
+    else:
+      msg += resource.get('gear_category').get('name') + '*'
+      if 'desc' in resource:
+        msg += '\n' + '\n'.join(resource.get('desc'))
+
+      if 'contents' in resource:
+        msg += '\nContents:'
+        for x in (resource.get('contents')):
+          msg += '\n- ' + x.get('item').get('name') + ' [' + str(x.get('quantity')) + ']'
+
+    msg += '\n(Costs ' + str(resource.get('cost').get('quantity')) + ' ' \
+            + resource.get('cost').get('unit') + ')'
+
+  await ctx.send(msg)
+
+# Searches the D&D API for specified magic items
 @bot.command(name='query-magic-item')
 async def query_magic_items(ctx, *, arg: str):
   query = 'magic-items/'
@@ -121,7 +178,7 @@ async def query_magic_items(ctx, *, arg: str):
     msg = '**Error:** The resource you were looking for could not be found.'
   else:
     msg = '__**' + resource.get('name') + '**__\n' \
-    + '\n'.join(resource.get('desc'))
+          + '\n'.join(resource.get('desc'))
 
   # If the message is longer than the character limit Discord allows, split the message into two halves
   if len(msg) > 2000:          

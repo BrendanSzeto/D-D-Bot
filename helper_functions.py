@@ -19,6 +19,7 @@ def roll_dice(amount, sides):
 def modify_query(query):
     query = query.lower()
     query = query.replace(' ', '-')
+    query = query.replace('\'', '')
     return query
 
 # Checks if the request is valid, and returns the resulting resource if it is
